@@ -1,16 +1,19 @@
 ---
 - name: checkout anyenv_repo for system
-  git: repo="{{ anyenv.git_url }}" dest="{{ anyenv.install_dir }}"
+  git:
+    repo: "{{ anyenv.git_url }}"
+    dest: "{{ anyenv.install_dir }}"
+    version: "master"
 
 - name: add anyenv initialization to profile system-wide
-  template: src=anyenv.sh.j2 dest=/etc/profile.d/anyenv.sh owner=root group=root mode=0755
-  become: yes
-  when:
-    - ansible_os_family != 'OpenBSD' and ansible_os_family != 'Darwin'
+  template:
+    src: anyenv.sh.j2
+    dest: "{{ anyenv.anyenv_sh }}"
+    mode: 0755
 
 - name: eval anyenv environment
   shell: >
-    bash -lc "anyenv install {{ item }}"
+    zsh -lc "anyenv install {{ item }}"
     creates={{ anyenv.install_dir }}/envs/{{ item }}
   environment:
     PATH: "{{ anyenv.install_dir }}/bin:{{ lookup('env', 'PATH') }}"
